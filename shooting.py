@@ -67,7 +67,7 @@ class Player(Spclass):#自機クラス
         if(self.rect.centery > HEIGHT - 16):
             self.rect.centery = HEIGHT - 16
         if(press[pygame.K_SPACE] != 0) and \
-        (self.time % 10 == 0):#弾丸を撃てる頻度の設定
+        (self.time % 5 == 0):#弾丸を撃てる頻度の設定
             newsp = Shot(\
             self.rect.centerx,self.rect.centery,0,1)
             allgroup.add(newsp)
@@ -84,6 +84,7 @@ class Fighter(Spclass):
         #self.rect.centerx += 2
         #if self.rect.centerx + 10 >= WIDTH:
         #    self.rect.centerx = 10
+        
         if self.time // 200 % 2 ==0:
             self.rect.centerx += 2
         else:
@@ -165,7 +166,7 @@ while endflag == 0:
             allgroup.add(boss)
         elif bosstimer < 0:
             if allgroup.has(boss) == 0: bosstimer = 60*20
-        elif random.randint(0,10) == 0: #ノーマル敵の発生率を変える
+        elif random.randint(0,5) == 0: #ノーマル敵の発生率を変える
             x = random.randint(0,WIDTH - 200) + 100
             newsp = Fighter(x, 100, 180, 4)#敵クラス(x座標,y座標,物体の角度,Sprite番号)
             allgroup.add(newsp)
