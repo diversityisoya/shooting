@@ -167,7 +167,7 @@ while endflag == 0:
     allgroup.empty()
     player = Player(WIDTH/2,HEIGHT*3/4,0,3)
     allgroup.add(player)
-    bosstimer = 60 * 20
+    bosstimer = 60 * 10
     #20秒でボスが出現する仕様
     gameover = 0
     while endflag == 0:
@@ -178,11 +178,21 @@ while endflag == 0:
             stars[i][1] = (stars[i][1]+i+1) % HEIGHT
             pygame.draw.rect(screen, WHITE,stars[i])
         bosstimer -= 1
-        if bosstimer == 0:
-            boss = Boss(WIDTH/2, 0, 180, 5)
-            allgroup.add(boss)
-        elif bosstimer < 0:
-            if allgroup.has(boss) == 0: bosstimer = 60*20
+        if bosstimer <= 0 and score >= 100:
+            #時間は十分経過していても撃破数が一定以上ないとボスは出現しない
+            boss = Boss(WIDTH/2,0,180,5)
+            if allgroup.has(boss)==False:
+                allgroup.add(boss)
+            if bosstimer < 0 and allgroup.has(boss)==True:
+                bosstimer = 60 * 20
+        
+        
+        #if bosstimer == 0:
+        #    boss = Boss(WIDTH/2, 0, 180, 5)
+        #    allgroup.add(boss)
+        #elif bosstimer < 0:
+        #    if allgroup.has(boss) == 0: bosstimer = 60*20
+            #bosstimerは60*x秒で設定、基本x秒後に出現する仕様
         elif random.randint(0,3) == 0: #ノーマル敵の発生率を変える
             x = random.randint(0,WIDTH - 200) + 100
             newsp = Fighter(x, 100, 180, 4)#敵クラス(x座標,y座標,物体の角度,Sprite番号)
