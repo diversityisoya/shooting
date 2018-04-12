@@ -47,11 +47,13 @@ class Fireball(Spclass):#敵機の弾丸クラス
         rad = math.radians(self.angle - 90)
         self.rect.centerx += (math.cos(rad)) * 4
         self.rect.centery += (math.sin(rad)) * 4
+        #方向と弾速を決める
 
 class Player(Spclass):#自機クラス
     def update(self):
         press = pygame.key.get_pressed()#キー入力を取得
-        if (press[pygame.K_UP]):self.rect.centery -= 4
+        if (press[pygame.K_UP]):
+            self.rect.centery -= 4
         if(press[pygame.K_DOWN]):
             self.rect.centery += 4
         if(press[pygame.K_LEFT]):
@@ -71,6 +73,12 @@ class Player(Spclass):#自機クラス
             newsp = Shot(\
             self.rect.centerx,self.rect.centery,0,1)
             allgroup.add(newsp)
+            newsp2 = Shot(\
+            self.rect.centerx+10,self.rect.centery,0,1)
+            allgroup.add(newsp2)
+            newsp3 = Shot(\
+            self.rect.centerx-10,self.rect.centery,0,1)
+            allgroup.add(newsp3)
             hitlist = pygame.sprite.spritecollide(\
             self,allgroup,False)
             for sp in hitlist:
@@ -78,6 +86,8 @@ class Player(Spclass):#自機クラス
                     self.hp -= 1
                     sp.hp -= 1
                     break
+        else:
+            pass
 
 class Fighter(Spclass):
     def update(self):
@@ -98,9 +108,15 @@ class Fighter(Spclass):
         dx = player.rect.centerx - self.rect.centerx
         dy = player.rect.centery - self.rect.centery
         angle = math.degrees(math.atan2(dy,dx))+90
+        #プレイヤーの方へ角度を決める
         newsp = Fireball(self.rect.centerx,\
         self.rect.centery,angle,2)
         allgroup.add(newsp)
+
+        newrandsp = Fireball(self.rect.centerx,self.rect.centery,angle + random.randint(-10,10),2)
+        allgroup.add(newrandsp)
+        #若干ぶれた方向にも弾丸を飛ばす。
+
 
 class Boss(Spclass):
     def update(self):
@@ -146,6 +162,7 @@ for i in range(10):
 
 allgroup = pygame.sprite.Group()
 endflag = 0
+score = 0
 while endflag == 0:
     allgroup.empty()
     player = Player(WIDTH/2,HEIGHT*3/4,0,3)
@@ -166,7 +183,7 @@ while endflag == 0:
             allgroup.add(boss)
         elif bosstimer < 0:
             if allgroup.has(boss) == 0: bosstimer = 60*20
-        elif random.randint(0,5) == 0: #ノーマル敵の発生率を変える
+        elif random.randint(0,3) == 0: #ノーマル敵の発生率を変える
             x = random.randint(0,WIDTH - 200) + 100
             newsp = Fighter(x, 100, 180, 4)#敵クラス(x座標,y座標,物体の角度,Sprite番号)
             allgroup.add(newsp)
@@ -176,6 +193,7 @@ while endflag == 0:
             x = sp.rect.centerx
             y = sp.rect.centery
             if sp.hp <= 0:
+                score += 1
                 allgroup.remove(sp)
                 newsp = Explosion(x,y,0,0)
                 allgroup.add(newsp)
@@ -183,11 +201,41 @@ while endflag == 0:
                 allgroup.remove(sp)
         allgroup.draw(screen)
         if allgroup.has(player) == 0:
+            score -= 1
+            screen.fill(BLACK)
             imagetext = \
             myfont.render("GAME OVER", True, WHITE)
+            info = pygame.font.Font(None,48)
+            infotext = \
+            info.render(" '1'->exit",True,WHITE)
+            info2 = pygame.font.Font(None,48)
+            infotext2 = \
+            info2.render(" '0'->continue",True,WHITE)
+            scfont = pygame.font.Font(None,48)
+            scoretext = \
+            scfont.render("score:"+str(score),True,WHITE)
+            
             screen.blit(imagetext,(230,200))
+            screen.blit(infotext,(230,250))
+            screen.blit(infotext2,(230,300))
+            screen.blit(scoretext,(230,350))
             gameover += 1
             if gameover >= 120: break
+            #gameover変数が120になるのは2秒後そのときにゲームをリセットする。
+            while(1):
+                pygame.display.flip()#更新された画面情報を描写
+                pygame.event.pump()
+                press2 = pygame.key.get_pressed()
+                if (press2[pygame.K_0]):
+                    endflag = 0
+                    gameover = 120
+                    score = 0
+                    break
+                if(press2[pygame.K_1]):
+                    endflag = 1
+                    break
+                
+
         myclock.tick(60)
-        pygame.display.flip()
+        pygame.display.flip()#更新された画面情報を描写
 pygame.quit()
