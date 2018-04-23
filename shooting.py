@@ -3,6 +3,7 @@ import pygame#基本ゲームライブラリ
 import math#数学用ライブラリ
 import random#乱数
 
+
 WIDTH = 640
 HEIGHT = 480
 BLACK = (0,0,0)
@@ -48,6 +49,14 @@ class Fireball(Spclass):#敵機の弾丸クラス
         self.rect.centerx += (math.cos(rad)) * 4
         self.rect.centery += (math.sin(rad)) * 4
         #方向と弾速を決める
+        #自機と同様のヒット仕様
+        hitlist2 = pygame.sprite.spritecollide(\
+        self,allgroup,False)
+        for sp in hitlist2:
+            if sp.enemy == True or sp.hp == 100: continue
+            self.rect.centerx = OUTSIDE
+            sp.hp -= 1
+            break
 
 class Player(Spclass):#自機クラス
     def update(self):
@@ -149,9 +158,9 @@ myfont = pygame.font.Font(None,48)
 myclock = pygame.time.Clock()
 charas = []
 charas.append(Characlass("explosion.png",1,False))#(使用する画像,hp,敵フラグ)
-charas.append(Characlass("mybullet.png",1,False))
+charas.append(Characlass("mybullet.png",100,False))
 charas.append(Characlass("enemybullet.jpg",99,True))
-charas.append(Characlass("player.png",1,False))
+charas.append(Characlass("player.png",10,False))
 charas.append(Characlass("yellow.png",1,True))
 charas.append(Characlass("boss.png",10,True))
 stars = []
@@ -178,10 +187,17 @@ while endflag == 0:
             stars[i][1] = (stars[i][1]+i+1) % HEIGHT
             pygame.draw.rect(screen, WHITE,stars[i])
         bosstimer -= 1
+        
+        hpinfo = pygame.font.Font(None,24)
+        hptext = \
+        hpinfo.render("your hp:"+str(player.hp), True, WHITE)
+        screen.blit(hptext,(50,HEIGHT-25))
+
         if bosstimer <= 0 and score >= 100:
             #時間は十分経過していても撃破数が一定以上ないとボスは出現しない
             boss = Boss(WIDTH/2,0,180,5)
             if allgroup.has(boss)==False:
+                player.hp = 10 
                 allgroup.add(boss)
             if bosstimer < 0 and allgroup.has(boss)==True:
                 bosstimer = 60 * 20
@@ -211,6 +227,7 @@ while endflag == 0:
                 allgroup.remove(sp)
         allgroup.draw(screen)
         if allgroup.has(player) == 0:
+            #gameover時の設定画面
             score -= 1
             screen.fill(BLACK)
             imagetext = \
